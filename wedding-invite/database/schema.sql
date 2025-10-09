@@ -1,0 +1,3 @@
+-- DB 스키마 예시
+-- CREATE TABLE ...
+

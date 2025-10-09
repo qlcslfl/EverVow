@@ -1,0 +1,8 @@
+<!-- Spring Boot 백엔드용 예시 pom.xml -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>wedding.invite</groupId>
+  <artifactId>wedding-invite-backend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</project>
+

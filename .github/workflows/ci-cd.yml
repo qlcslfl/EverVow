@@ -1,0 +1,54 @@
+name: CI/CD for Next.js & Spring Boot
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  nextjs:
+    name: Next.js Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: EverVow
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Run tests
+        run: npm test
+      - name: Deploy to Vercel (placeholder)
+        run: echo "Deploying to Vercel..."
+        # 실제 배포는 Vercel Action 또는 Vercel CLI 사용
+
+  springboot:
+    name: Spring Boot Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: EverVow
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Run tests
+        run: ./gradlew test
+      - name: Deploy to Render (placeholder)
+        run: echo "Deploying to Render..."
+        # 실제 Render 배포는 Render CLI 또는 API 사용
+
