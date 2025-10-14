@@ -2,6 +2,11 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/": "pages/index.js",
   "/form": "pages/form.js",
-  "/": "pages/index.js"
+  "/design": "pages/design.js",
+  "/preview/[id]": "pages/preview/[id].js",
+  "/invite/[id]": "pages/invite/[id].js",
+  "/admin": "pages/admin.js",
+  "/admin/invitations/[id]": "pages/admin/invitations/[id].js"
 }
