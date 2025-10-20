@@ -1,5 +1,5 @@
 // 이미지 업로드 컴포넌트 (Base64 방식 + 압축)
-import { useState, useId } from 'react';
+import { useState, useId, useEffect } from 'react';
 import { uploadImage, uploadMultipleImages, validateImageFile, getStorageUsage } from '../utils/imageUpload';
 
 const ImageUploader = ({
@@ -13,10 +13,20 @@ const ImageUploader = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressionInfo, setCompressionInfo] = useState('');
+  const [storageUsage, setStorageUsage] = useState({ usageInMB: 0, remainingMB: 5 });
+  const [isMounted, setIsMounted] = useState(false);
 
   // 각 컴포넌트 인스턴스마다 고유한 ID 생성
   const uniqueId = useId();
   const inputId = `image-upload-${uniqueId}`;
+
+  // 클라이언트에서만 저장 공간 정보 가져오기
+  useEffect(() => {
+    setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      setStorageUsage(getStorageUsage());
+    }
+  }, []);
 
   const handleFileSelect = async (event) => {
     const files = event.target.files;
@@ -24,8 +34,8 @@ const ImageUploader = ({
 
     try {
       // 저장 공간 확인
-      const storageUsage = getStorageUsage();
-      if (storageUsage.remainingMB < 1) {
+      const currentStorageUsage = getStorageUsage();
+      if (currentStorageUsage.remainingMB < 1) {
         alert('저장 공간이 부족합니다. 기존 이미지를 삭제한 후 다시 시도해주세요.');
         return;
       }
@@ -77,6 +87,7 @@ const ImageUploader = ({
 
       // 저장 공간 정보 업데이트
       const newStorageUsage = getStorageUsage();
+      setStorageUsage(newStorageUsage);
       setTimeout(() => {
         setCompressionInfo(`저장 공간: ${newStorageUsage.usageInMB}MB / 5MB 사용중`);
       }, 2000);
@@ -108,9 +119,6 @@ const ImageUploader = ({
     const newPreviews = previewUrls.filter((_, i) => i !== index);
     setPreviewUrls(newPreviews);
   };
-
-  // 저장 공간 정보
-  const storageUsage = getStorageUsage();
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -144,13 +152,15 @@ const ImageUploader = ({
         </label>
       </div>
 
-      {/* 저장 공간 정보 */}
-      <div className="text-xs text-gray-500 text-center">
-        저장 공간: {storageUsage.usageInMB}MB / 5MB 사용중
-        {storageUsage.remainingMB < 1 && (
-          <span className="text-red-500 ml-2">⚠️ 공간 부족</span>
-        )}
-      </div>
+      {/* 저장 공간 정보 - 클라이언트에서만 표시 */}
+      {isMounted && (
+        <div className="text-xs text-gray-500 text-center">
+          저장 공간: {storageUsage.usageInMB}MB / 5MB 사용중
+          {storageUsage.remainingMB < 1 && (
+            <span className="text-red-500 ml-2">⚠️ 공간 부족</span>
+          )}
+        </div>
+      )}
 
       {/* 압축 정보 */}
       {compressionInfo && (

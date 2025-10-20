@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { templates, getTemplateComponent } from '../../utils/templates';
 
 export default function Invite() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, designId } = router.query;
   const [weddingData, setWeddingData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+
+  // 템플릿 메타데이터와 컴포넌트 가져오기
+  const templateId = Number(designId) || 1;
+  const template = templates.find((t) => t.id === templateId) || templates[0];
+  const TemplateComponent = template?.component || getTemplateComponent(templateId);
 
   useEffect(() => {
     setMounted(true);
@@ -86,22 +92,21 @@ export default function Invite() {
           console.log('Found invitation:', foundInvitation);
 
           const processedData = {
-            ...foundInvitation,
-            groomKorName: foundInvitation.groom_kor_name || foundInvitation.groomKorName || '신랑',
-            groomEngName: foundInvitation.groom_eng_name || foundInvitation.groomEngName || 'Groom',
-            brideKorName: foundInvitation.bride_kor_name || foundInvitation.brideKorName || '신부',
-            brideEngName: foundInvitation.bride_eng_name || foundInvitation.brideEngName || 'Bride',
+            groomName: foundInvitation.groom_kor_name || foundInvitation.groomKorName || '신랑',
+            brideName: foundInvitation.bride_kor_name || foundInvitation.brideKorName || '신부',
             weddingDate: foundInvitation.wedding_date || foundInvitation.weddingDate || '2024-12-25',
             weddingTime: foundInvitation.wedding_time || foundInvitation.weddingTime || '14:00',
-            venue: foundInvitation.venue || '웨딩홀',
+            venueName: foundInvitation.venue || '웨딩홀',
             venueAddress: foundInvitation.venue_address || foundInvitation.venueAddress || '서울시 강남구',
-            message: foundInvitation.message || '저희의 결혼식에 초대합니다.',
-            titleImage: foundInvitation.title_image || foundInvitation.titleImage || '',
-            gallery: foundInvitation.gallery || foundInvitation.gallery_images || [],
-            groomFatherName: foundInvitation.groom_father_name || foundInvitation.groomFatherName || '신랑아버지',
-            groomMotherName: foundInvitation.groom_mother_name || foundInvitation.groomMotherName || '신랑어머니',
-            brideFatherName: foundInvitation.bride_father_name || foundInvitation.brideFatherName || '신부아버지',
-            brideMotherName: foundInvitation.bride_mother_name || foundInvitation.brideMotherName || '신부어머니'
+            greetingMessage: foundInvitation.message || '저희의 결혼식에 초대합니다.',
+            heroImage: foundInvitation.title_image || foundInvitation.titleImage || '',
+            galleryImages: foundInvitation.gallery || foundInvitation.gallery_images || [],
+            groomParents: `${foundInvitation.groom_father_name || '신랑아버지'} · ${foundInvitation.groom_mother_name || '신랑어머니'}의 아들`,
+            brideParents: `${foundInvitation.bride_father_name || '신부아버지'} · ${foundInvitation.bride_mother_name || '신부어머니'}의 딸`,
+            groomPhone: foundInvitation.groom_phone || '',
+            bridePhone: foundInvitation.bride_phone || '',
+            venueDetail: foundInvitation.venue_detail || '',
+            footerMessage: foundInvitation.footer_message || '함께해 주셔서 감사합니다'
           };
 
           console.log('=== 처리된 데이터 ===');
@@ -110,28 +115,24 @@ export default function Invite() {
           setWeddingData(processedData);
         } else {
           console.log('=== 데이터 없음 - 샘플 데이터 사용 ===');
-          console.log('No invitation found for ID:', id);
-          console.log('Available invitations:', invitations.map(inv => ({
-            id: inv.id,
-            share_url: inv.share_url,
-            names: `${inv.groom_kor_name || inv.groomKorName || 'Unknown'} & ${inv.bride_kor_name || inv.brideKorName || 'Unknown'}`
-          })));
 
           // 샘플 데이터 생성
           const sampleData = {
-            groomKorName: '김신랑',
-            brideKorName: '박신부',
-            groomEngName: 'Groom Kim',
-            brideEngName: 'Bride Park',
-            weddingDate: '2024-12-25',
-            weddingTime: '14:00',
-            venue: '샘플 웨딩홀',
-            venueAddress: '서울시 강남구 샘플로 123',
-            message: '저희 두 사람이 사랑으로 하나가 되는 소중한 자리에\n여러분을 초대합니다.',
-            groomFatherName: '김아버지',
-            groomMotherName: '김어머니',
-            brideFatherName: '박아버지',
-            brideMotherName: '박어머니'
+            groomName: '김신랑',
+            brideName: '박신부',
+            weddingDate: '2024년 12월 25일 토요일',
+            weddingTime: '오후 2시',
+            venueName: '그랜드 웨딩홀',
+            venueAddress: '서울시 강남구 테헤란로 123',
+            greetingMessage: '저희 두 사람이 사랑으로 하나가 되는\n소중한 자리에 여러분을 초대합니다.',
+            heroImage: '',
+            galleryImages: [],
+            groomParents: '김아버지 · 김어머니의 아들',
+            brideParents: '박아버지 · 박어머니의 딸',
+            groomPhone: '010-1234-5678',
+            bridePhone: '010-8765-4321',
+            venueDetail: '3층 그랜드홀',
+            footerMessage: '함께해 주셔서 감사합니다'
           };
 
           console.log('Using sample data:', sampleData);
@@ -143,19 +144,18 @@ export default function Invite() {
 
         // 에러 발생 시에도 샘플 데이터 제공
         const errorSampleData = {
-          groomKorName: '김신랑',
-          brideKorName: '박신부',
-          groomEngName: 'Groom Kim',
-          brideEngName: 'Bride Park',
-          weddingDate: '2024-12-25',
-          weddingTime: '14:00',
-          venue: '샘플 웨딩홀',
-          venueAddress: '서울시 강남구 샘플로 123',
-          message: '저희 두 사람이 사랑으로 하나가 되는 소중한 자리에\n여러분을 초대합니다.',
-          groomFatherName: '김아버지',
-          groomMotherName: '김어머니',
-          brideFatherName: '박아버지',
-          brideMotherName: '박어머니'
+          groomName: '김신랑',
+          brideName: '박신부',
+          weddingDate: '2024년 12월 25일 토요일',
+          weddingTime: '오후 2시',
+          venueName: '그랜드 웨딩홀',
+          venueAddress: '서울시 강남구 테헤란로 123',
+          greetingMessage: '저희 두 사람이 사랑으로 하나가 되는\n소중한 자리에 여러분을 초대합니다.',
+          heroImage: '',
+          galleryImages: [],
+          groomParents: '김아버지 · 김어머니의 아들',
+          brideParents: '박아버지 · 박어머니의 딸',
+          footerMessage: '함께해 주셔서 감사합니다'
         };
 
         console.log('Using error fallback data:', errorSampleData);
@@ -210,88 +210,15 @@ export default function Invite() {
   return (
     <>
       <Head>
-        <title>{weddingData.groomKorName} ♥ {weddingData.brideKorName} 결혼식 초대</title>
+        <title>{weddingData.groomName} ♥ {weddingData.brideName} 결혼식 초대</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+        <meta property="og:title" content={`${weddingData.groomName} ♥ ${weddingData.brideName} 결혼식 초대`} />
+        <meta property="og:description" content={weddingData.greetingMessage} />
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50 font-['Noto_Sans_KR',sans-serif]">
-        <div className="max-w-md mx-auto bg-white min-h-screen">
-          {/* 메인 섹션 */}
-          <div className="px-6 py-12 text-center">
-            {/* 대표 이미지 */}
-            <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border">
-              {weddingData.titleImage ? (
-                <img
-                  src={weddingData.titleImage}
-                  alt="Wedding couple"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                />
-              ) : null}
-              <span className="text-3xl" style={{
-                display: weddingData.titleImage ? 'none' : 'block'
-              }}>💍</span>
-            </div>
-
-            {/* 커플 이름 */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {weddingData.groomKorName} ♥ {weddingData.brideKorName}
-            </h1>
-
-            <p className="text-sm text-gray-500 mb-8 uppercase tracking-wider">
-              {weddingData.groomEngName} & {weddingData.brideEngName}
-            </p>
-
-            {/* 날짜 및 시간 */}
-            <div className="mb-8">
-              <p className="text-xl text-gray-800 mb-1">
-                2024년 12월 25일 수요일
-              </p>
-              <p className="text-gray-600">
-                오후 2시 00분
-              </p>
-            </div>
-
-            {/* 장소 */}
-            <div className="mb-8">
-              <p className="text-lg text-gray-800 mb-1">
-                {weddingData.venue}
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                {weddingData.venueAddress}
-              </p>
-              <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors">
-                지도 보기
-              </button>
-            </div>
-
-            {/* 인사말 */}
-            <div className="bg-gray-50 p-6 rounded-lg mb-8">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
-                {weddingData.message}
-              </p>
-            </div>
-
-            {/* 신랑신부 정보 */}
-            <div className="flex justify-between text-xs text-gray-600 bg-gray-50 p-4 rounded-lg">
-              <div className="text-left">
-                <p className="mb-1">신랑: {weddingData.groomKorName}</p>
-                <p className="mb-2">{weddingData.groomFatherName} · {weddingData.groomMotherName}</p>
-                <p className="text-gray-500">의 아들</p>
-              </div>
-              <div className="text-right">
-                <p className="mb-1">신부: {weddingData.brideKorName}</p>
-                <p className="mb-2">{weddingData.brideFatherName} · {weddingData.brideMotherName}</p>
-                <p className="text-gray-500">의 딸</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 템플릿 컴포넌트 렌더링 */}
+      <TemplateComponent data={weddingData} />
     </>
   );
 }

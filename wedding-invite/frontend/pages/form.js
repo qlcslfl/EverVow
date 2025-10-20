@@ -941,7 +941,7 @@ export default function Form() {
 
       {/* 하단 고정 버튼 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="max-w-2xl mx-auto flex gap-4">
+        <div className="max-w-6xl mx-auto flex gap-4">
           <button
             type="button"
             className="flex-1 py-4 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
