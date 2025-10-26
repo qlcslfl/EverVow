@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15
+    container_name: evervow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: evervow
+      POSTGRES_USER: evervow_user
+      POSTGRES_PASSWORD: evervow_password
+    volumes:
+      - evervow_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    image: openjdk:17-jdk
+    container_name: evervow-backend
+    depends_on:
+      - db
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/target:/app/target:ro
+    working_dir: /app
+    environment:
+      - SPRING_MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=*
+      - SPRING_MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    command: ["java","-jar","/app/target/evervow-backend-0.0.1-SNAPSHOT.jar","--spring.datasource.url=jdbc:postgresql://db:5432/evervow","--spring.datasource.username=evervow_user","--spring.datasource.password=evervow_password","--spring.jpa.hibernate.ddl-auto=update","--management.endpoints.web.exposure.include=*","--management.endpoint.health.show-details=always"]
+
+volumes:
+  evervow_pgdata:
+    driver: local

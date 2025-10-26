@@ -127,4 +127,9 @@ public class InvitationService {
 
         return shareUrl;
     }
+
+    // 공개된 청첩장 목록 조회
+    public List<Invitation> getPublicInvitations() {
+        return invitationRepository.findPublicInvitations();
+    }
 }

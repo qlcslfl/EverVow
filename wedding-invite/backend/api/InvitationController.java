@@ -84,6 +84,16 @@ public class InvitationController {
         return ResponseEntity.ok(dtos);
     }
 
+    // 공개 청첩장 목록 (홈에서 사용)
+    @GetMapping
+    public ResponseEntity<List<InvitationResponseDto>> getPublicInvitations() {
+        List<Invitation> invitations = invitationService.getPublicInvitations();
+        List<InvitationResponseDto> dtos = invitations.stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
     // 청첩장 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvitation(@PathVariable UUID id) {
